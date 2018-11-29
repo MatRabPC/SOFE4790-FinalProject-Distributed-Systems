@@ -19,19 +19,29 @@ Registered to		samvvsam
 
 */
 
+//play music files
+//analyse bpm
+	//find songs that match bpm
+//file name to tag
+
 public class FibClient {
 	
-
+	public static String SET_PATH = "";
+	
    public static void main(String[] args) {
 
       try {
         Fib f = (Fib) Naming.lookup(Fib.SERVICENAME);
 				
 		
-        String s = f.dirChooseReturnPath();
-		System.out.println(s);
+        SET_PATH = f.dirChooseReturnPath();
+		System.out.println(SET_PATH);
 		
-		File folder = new File(s);
+		viewGUI();
+		//GUIForTagger(s);
+		/*
+		
+		File folder = new File(SET_PATH);
 		
 		FilenameFilter mp3Filter = new FilenameFilter() {
 			public boolean accept(File dir, String name) {
@@ -73,33 +83,51 @@ public class FibClient {
 		//searchThis("Rob+Thomas");
 	//	GUIForTagger(s);
 		//readFileTags(s);
-		
+		*/
 		
         //System.out.println("The factorial of "+ x + " is: "+fn);
       } catch(Exception e) {
         System.err.println("Remote exception: "+e.getMessage());
         e.printStackTrace();
       }
+	  
    }
    
    
-   public static String[] guessAlbum(File[] listOfFiles)
+   public static File[] getFileList(String path)
    {
-	   String [] guesses = new String[listOfFiles.length];
-	   
-	   for(int i = 0; i < listOfFiles.length; i++)
-	   {
-	   Mp3File mp3file = initiateTagger(listOfFiles[i].getAbsolutePath());
-	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-	   try {
-		   //System.out.println(id3v2Tag.getAlbum());
-			guesses[i] = id3v2Tag.getAlbum();
-	   }catch(NullPointerException e) {continue;}
-	   }
-	   return guesses;
-	   
-	   
+	   File folder = new File(path); 
+		
+		FilenameFilter mp3Filter = new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				String lowercaseName = name.toLowerCase();
+				if (lowercaseName.endsWith(".mp3")) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};	
+		
+		return folder.listFiles(mp3Filter);
+
    }
+   
+   public static String[] getFileNames(File[] files)
+   {
+	   String [] list = new String[files.length];
+	   
+	   for (int i = 0; i < files.length; i++) {
+		if (files[i].isFile() ) {//&& listOfFiles[i].getName().toLowerCase().endsWith(".mp3")) {
+			list[i] = files[i].getName();
+		  } //else if (listOfFiles[i].isDirectory()) {
+			//System.out.println("Directory " + listOfFiles[i].getName());
+		  //}
+		}
+		return list;
+   }
+   
+
    
    public static void GUIForAlbumGuesses(String[] guesses)
    {
@@ -113,6 +141,70 @@ public class FibClient {
 
         frame.setSize(300, 200);
         frame.setVisible(true);
+	   
+   }
+   
+   public static void viewGUI()
+   {
+	   JFrame mainFrame = new JFrame("");
+		mainFrame.setLayout(new GridLayout(1,2));
+		
+				JPanel filePanel = new JPanel();
+		filePanel.setLayout(new GridLayout(2, 1));
+		JList list = new JList(getFileNames(getFileList(SET_PATH)));
+		
+		filePanel.add(list);
+		filePanel.setBorder(BorderFactory.createTitledBorder(
+                   BorderFactory.createEtchedBorder(), "Files"));
+				   
+				   
+		
+		JButton buttonSortAlbum = new JButton("Auto-Sort by Album");
+		buttonSortAlbum.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			 sortIntoFoldersAlbum(getFileList(SET_PATH));
+			 JOptionPane.showMessageDialog(null, "Sorted by album.","Message", JOptionPane.INFORMATION_MESSAGE);
+			 mainFrame.revalidate();
+          }});
+		
+		
+		
+		JButton buttonSortArtist = new JButton("Auto-Sort by Artist");
+		buttonSortArtist.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			 sortIntoFoldersArtist(getFileList(SET_PATH));
+			 JOptionPane.showMessageDialog(null, "Sorted by artist.","Message", JOptionPane.INFORMATION_MESSAGE);
+          }});
+		  
+		  
+		JButton buttonRenameFile = new JButton("Rename");
+		
+		JPanel sidePanel = new JPanel(); 
+		sidePanel.setLayout(new GridLayout(3, 1));
+        
+		sidePanel.add(buttonSortAlbum);
+		sidePanel.add(buttonSortArtist);
+		sidePanel.add(buttonRenameFile);
+		
+
+        //... Add a titled border to the button panel.
+        sidePanel.setBorder(BorderFactory.createTitledBorder(
+                   BorderFactory.createEtchedBorder(), "Sort"));
+				   
+		
+
+		
+				   
+				   
+		mainFrame.add(sidePanel);
+		mainFrame.add(filePanel);
+		mainFrame.setSize(1280,720);
+        mainFrame.setLocationRelativeTo(null);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainFrame.pack();
+        mainFrame.setVisible(true);
 	   
    }
    
@@ -342,9 +434,28 @@ public static void readFileTags(String filename)	{
 	}catch (Exception e) {}
 }
 
-public static void sortIntoFolders(String direc, String[] albums, File[] files)
+public static String[] listOfAlbum(File[] listOfFiles)
 {
+	   String [] guesses = new String[listOfFiles.length];
+	   
+	   for(int i = 0; i < listOfFiles.length; i++)
+	   {
+	   Mp3File mp3file = initiateTagger(listOfFiles[i].getAbsolutePath());
+	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			guesses[i] = id3v2Tag.getAlbum();
+	   }catch(NullPointerException e) {continue;}
+	   }
+	   guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]); //remove duplicates
+	   return guesses;
+}
+
+public static void sortIntoFoldersAlbum(File[] files)
+{
+	String direc = SET_PATH;
 	String temp = "";
+	String[] albums = listOfAlbum(files);
 	
 	for (String album : albums)
 			if (album != null)
@@ -359,11 +470,48 @@ public static void sortIntoFolders(String direc, String[] albums, File[] files)
 			temp = id3v2Tag.getAlbum();
 			song.renameTo(new File(direc+"/"+temp+"/"+song.getName()));
 	   }catch(NullPointerException e) {}
+	   }	
+}
+
+
+
+public static String[] listOfArtists(File[] listOfFiles)
+{
+	   String [] guesses = new String[listOfFiles.length];
+	   
+	   for(int i = 0; i < listOfFiles.length; i++)
+	   {
+	   Mp3File mp3file = initiateTagger(listOfFiles[i].getAbsolutePath());
+	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			guesses[i] = id3v2Tag.getArtist();
+	   }catch(NullPointerException e) {continue;}
 	   }
-		
-		
+	   guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]); //remove duplicates
+	   return guesses;
+}
+
+public static void sortIntoFoldersArtist(File[] files)
+{
+	String direc = SET_PATH;
+	String temp = "";
+	String[] albums = listOfArtists(files);
 	
-	
+	for (String album : albums)
+			if (album != null)
+				new File(direc+"/"+album).mkdirs();
+			
+	for (File song : files)
+	{
+		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
+		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			temp = id3v2Tag.getArtist();
+			song.renameTo(new File(direc+"/"+temp+"/"+song.getName()));
+	   }catch(NullPointerException e) {}
+	   }	
 }
 	
 
