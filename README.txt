@@ -23,9 +23,4 @@ Client:
 
 
 
-TODO: shazam; song look up; queue; nice gui; auto set <- this one is easy, once we get the right GUI up we just use the set code
-		also rename files, etc
-		
-		in client there is a look up i just need to separate xml tags and grab relevant info buftiasdhkjldsm
-
-Holdups: song look up. look up libraries/databases are difficult to access, or im just bad at this. Mostly me bad at this
+TODO: Clean UI, migrate computations to server-side, add functionality for empty buttons, add new/useful methods
