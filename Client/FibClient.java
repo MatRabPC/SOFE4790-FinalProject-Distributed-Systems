@@ -347,7 +347,8 @@ public static String[] listOfAlbum(File[] listOfFiles)
 public static void renameByTags()
 {
 	File[] files = getFileList(SET_PATH);
-	String temp = "";
+	String temp1 = "";
+	String temp2 = "";
 		
 	for (File song : files)
 	{
@@ -355,14 +356,24 @@ public static void renameByTags()
 		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
 	   try {
 		   //System.out.println(id3v2Tag.getAlbum());
-			temp = id3v2Tag.getTitle();
-			if (temp != null && !temp.equals("null"))
+			temp1 = id3v2Tag.getTitle();
+			System.out.println(temp1);
+			temp2 = (id3v2Tag.getTrack()).split("/")[0];
+			System.out.println(temp2);
+			if (temp1 != null && !temp1.equals("null"))
 			{
-				song.renameTo(new File(SET_PATH+"/"+temp+".mp3"));
-				System.out.println(SET_PATH+"/"+temp+".mp3");
+				if (temp2 != null && !temp2.equals("null"))
+			{
+				//Files.move(source, source.resolveSibling(temp2+" " + temp1+".mp3"));
+				song.renameTo(new File(SET_PATH+"/"+temp2+" " + temp1+".mp3"));
+				System.out.println(SET_PATH+"/"+temp2+" " + temp1+".mp3");
+			}
+			else
+				song.renameTo(new File(SET_PATH+"/"+temp2+" " + temp1+".mp3"));
+			System.out.println(song.getAbsolutePath());
 			}
 			
-	   }catch(NullPointerException e) {}
+	   }catch(Exception e) {}
 	   }	
 }
 
