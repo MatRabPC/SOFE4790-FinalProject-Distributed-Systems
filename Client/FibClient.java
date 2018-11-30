@@ -10,86 +10,27 @@ import javax.swing.JOptionPane;
 import com.mpatric.mp3agic.*;
 import java.util.HashSet;
 import java.util.Arrays;
-/*
 
-Application name	Tagger
-API key				aabe9493c7ae7cc922ebe242f84ba4bb
-Shared secret		e14bf94f5c8a3d8e924b46e7b89e6a85
-Registered to		samvvsam
-
-*/
-
-//play music files
-//analyse bpm
-	//find songs that match bpm
-//file name to tag
 
 public class FibClient {
 	
 	public static String SET_PATH = "";
+	public static Fib f = null;
 	
    public static void main(String[] args) {
 
       try {
-        Fib f = (Fib) Naming.lookup(Fib.SERVICENAME);
-				
-		
-        SET_PATH = f.dirChooseReturnPath();
-		System.out.println(SET_PATH);
-		
-		viewGUI();
-		//GUIForTagger(s);
-		/*
-		
-		File folder = new File(SET_PATH);
-		
-		FilenameFilter mp3Filter = new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				String lowercaseName = name.toLowerCase();
-				if (lowercaseName.endsWith(".mp3")) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		};
-		
-		
-		
-		File[] listOfFiles = folder.listFiles(mp3Filter);
-
-		for (int i = 0; i < listOfFiles.length; i++) {
-		if (listOfFiles[i].isFile() ) {//&& listOfFiles[i].getName().toLowerCase().endsWith(".mp3")) {
-			System.out.println(listOfFiles[i].getName());
-		  } //else if (listOfFiles[i].isDirectory()) {
-			//System.out.println("Directory " + listOfFiles[i].getName());
-		  //}
-		}
-		
-		
-		String[] guesses = guessAlbum(listOfFiles);
-		
-		guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]);
-		
-		//for (String guess : guesses)
-			//if (guess != null)
-				//System.out.println(guess);
-			
-		//GUIForAlbumGuesses(guesses);
-		
-		sortIntoFolders(f.dirChooseReturnPath(), guesses, folder.listFiles(mp3Filter));
-		
-		
-		//searchThis("Rob+Thomas");
-	//	GUIForTagger(s);
-		//readFileTags(s);
-		*/
-		
-        //System.out.println("The factorial of "+ x + " is: "+fn);
+        f = (Fib) Naming.lookup(Fib.SERVICENAME);
+		SET_PATH = f.dirChooseReturnPath();
       } catch(Exception e) {
         System.err.println("Remote exception: "+e.getMessage());
         e.printStackTrace();
-      }
+      } 
+	  
+	  
+		System.out.println(SET_PATH);
+		
+		viewGUI();
 	  
    }
    
@@ -125,23 +66,6 @@ public class FibClient {
 		  //}
 		}
 		return list;
-   }
-   
-
-   
-   public static void GUIForAlbumGuesses(String[] guesses)
-   {
-	   
-	   JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        JList list = new JList((guesses));
-
-        frame.add(new JScrollPane(list));
-
-        frame.setSize(300, 200);
-        frame.setVisible(true);
-	   
    }
    
    public static void viewGUI()
@@ -180,194 +104,116 @@ public class FibClient {
 		  
 		  
 		JButton buttonRenameFile = new JButton("Rename");
+		JButton buttonManual = new JButton("Manual Tag");
+		JButton buttonSetDir = new JButton("Set Directory");
 		
 		JPanel sidePanel = new JPanel(); 
-		sidePanel.setLayout(new GridLayout(3, 1));
+		sidePanel.setLayout(new GridLayout(5, 1));
         
 		sidePanel.add(buttonSortAlbum);
 		sidePanel.add(buttonSortArtist);
 		sidePanel.add(buttonRenameFile);
+		sidePanel.add(buttonManual);
+		sidePanel.add(buttonSetDir);
 		
 
         //... Add a titled border to the button panel.
         sidePanel.setBorder(BorderFactory.createTitledBorder(
                    BorderFactory.createEtchedBorder(), "Sort"));
 				   
-		
-
-		
-				   
-				   
 		mainFrame.add(sidePanel);
 		mainFrame.add(filePanel);
 		mainFrame.setSize(1280,720);
         mainFrame.setLocationRelativeTo(null);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrame.pack();
+		//mainFrame.pack();
         mainFrame.setVisible(true);
 	   
    }
-   
-   public static void GUIForTagger(String path)  {
-	   /**
-	   * This method builds the main window for the Client UID
-	   * @param String path: path for file of mp3
-	   * @return none
-	   */
-	   
-	   Mp3File mp3file = initiateTagger(path);
-	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-	   
-	  
-	   
-		JFrame mainFrame = new JFrame("");
-		mainFrame.setLayout(new GridLayout(8,2));
-		
-		
-		JTextField textTitle = new JTextField(20);
-		JButton buttonTitle = new JButton("Set Title");
-		
-		buttonTitle.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-				id3v2Tag.setTitle(textTitle.getText());
-				try{
-				mp3file.save("New.mp3");
-				showProgress("Title change to " + textTitle.getText());
-				}
-					catch (Exception e) {}
-          }});
-		
-		
-		
-		JTextField textArtist = new JTextField(20);
-		JButton buttonArtist = new JButton("Set Artist");
-		buttonArtist.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-				id3v2Tag.setArtist(textArtist.getText());
-				try{
-				mp3file.save("New.mp3");
-				showProgress("Artist change to " + textArtist.getText());
-				}
-					catch (Exception e) {}
-          }});
-		  
-		
-		
-		JTextField textAlbum = new JTextField(20);
-		JButton buttonAlbum = new JButton("Set Album");
-		buttonAlbum.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-				id3v2Tag.setAlbum(textAlbum.getText());
-				try{
-				mp3file.save("New.mp3");
-				showProgress("Album change to " + textAlbum.getText());
-				}
-					catch (Exception e) {}
-          }});
-		
-		
-		
-		JTextField textYear = new JTextField(20);
-		JButton buttonYear = new JButton("Set Year");
-		buttonYear.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-			  //TODO try/catch IntegerparseInt check
-				id3v2Tag.setYear(textYear.getText());
-				try{
-				mp3file.save("New.mp3");
-				showProgress("Year change to " + textYear.getText());
-				}
-					catch (Exception e) {}
-          }});
-		
-		
-		
-		JTextField textGenre = new JTextField(20);
-		JButton buttonGenre = new JButton("Set Genre");
-		buttonGenre.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-				//id3v2Tag.setGenre(textGenre.getText());
-				try{
-				mp3file.save("New.mp3");
-				//showProgress("Artist change to " + textArtist.getText());
-				}
-					catch (Exception e) {}
-          }});
-		
-		
-		
-		JTextField textTrack = new JTextField(20);
-		JButton buttonTrack = new JButton("Set Track");
-		buttonTrack.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-				//TODO try/catch IntegerparseInt check
-				id3v2Tag.setTrack(textTrack.getText());
-				try{
-				mp3file.save("New.mp3");
-				showProgress("Track number change to " + textTrack.getText());
-				}
-					catch (Exception e) {}
-          }});
-		  
-		  
-		  
-		  JTextField textLook = new JTextField(20);
-		JButton buttonLook = new JButton("Look Up DASJ");
-		buttonLook.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-			  System.out.println("WAIT A MIN");
-				searchThis((textLook.getText()).replaceAll(" ","+"));
-          }});
-		  
-		 JButton buttonPrintToCMD = new JButton("Read (OLD) MP3 File");
-		buttonPrintToCMD.addActionListener( new ActionListener() {
-          @Override
-          public void actionPerformed( ActionEvent aActionEvent ) {
-				readFileTags(path);
-          }});
-		  
 
-		  
-	
-		mainFrame.add(textTitle);
-		mainFrame.add(buttonTitle);		
-		mainFrame.add(textArtist);
-		mainFrame.add(buttonArtist);		
-		mainFrame.add(textAlbum);
-		mainFrame.add(buttonAlbum);		
-		mainFrame.add(textYear);
-		mainFrame.add(buttonYear);		
-		mainFrame.add(textGenre);
-		mainFrame.add(buttonGenre);
-		mainFrame.add(textTrack);
-		mainFrame.add(buttonTrack);
-		mainFrame.add(textLook);
-		mainFrame.add(buttonLook);
-		mainFrame.add(buttonPrintToCMD);
-		
-        mainFrame.setSize(1280,720);
-        mainFrame.setLocationRelativeTo(null);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrame.pack();
-        mainFrame.setVisible(true);
-		
-		
-   }
-   
-  
-public static void showProgress(String message)
+public static String[] listOfAlbum(File[] listOfFiles)
 {
-	JOptionPane.showMessageDialog(null, message+" completed.","Message", JOptionPane.INFORMATION_MESSAGE);
+	   String [] guesses = new String[listOfFiles.length];
+	   
+	   for(int i = 0; i < listOfFiles.length; i++)
+	   {
+	   Mp3File mp3file = initiateTagger(listOfFiles[i].getAbsolutePath());
+	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			guesses[i] = id3v2Tag.getAlbum();
+	   }catch(NullPointerException e) {continue;}
+	   }
+	   guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]); //remove duplicates
+	   return guesses;
 }
 
-  
+public static void sortIntoFoldersAlbum(File[] files)
+{
+	String direc = SET_PATH;
+	String temp = "";
+	String[] albums = listOfAlbum(files);
+	
+	for (String album : albums)
+			if (album != null)
+				new File(direc+"/"+album).mkdirs();
+			
+	for (File song : files)
+	{
+		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
+		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			temp = id3v2Tag.getAlbum();
+			song.renameTo(new File(direc+"/"+temp+"/"+song.getName()));
+	   }catch(NullPointerException e) {}
+	   }	
+}
+
+public static String[] listOfArtists(File[] listOfFiles)
+{
+	   String [] guesses = new String[listOfFiles.length];
+	   
+	   for(int i = 0; i < listOfFiles.length; i++)
+	   {
+	   Mp3File mp3file = initiateTagger(listOfFiles[i].getAbsolutePath());
+	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			guesses[i] = id3v2Tag.getArtist();
+	   }catch(NullPointerException e) {continue;}
+	   }
+	   guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]); //remove duplicates
+	   return guesses;
+}
+
+public static void sortIntoFoldersArtist(File[] files)
+{
+	String direc = SET_PATH;
+	String temp = "";
+	String[] albums = listOfArtists(files);
+	
+	for (String album : albums)
+			if (album != null)
+				new File(direc+"/"+album).mkdirs();
+			
+	for (File song : files)
+	{
+		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
+		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			temp = id3v2Tag.getArtist();
+			song.renameTo(new File(direc+"/"+temp+"/"+song.getName()));
+	   }catch(NullPointerException e) {}
+	   }	
+	   /*
+	   try {
+	   SET_PATH = f.dirChooseReturnPath();
+	   }catch(Exception e) {}
+	   */
+}
+
 public static Mp3File initiateTagger(String filename)	{
 		 /**
 	   * This method creates an MP3File Object (to be tagged)
@@ -433,122 +279,5 @@ public static void readFileTags(String filename)	{
 	
 	}catch (Exception e) {}
 }
-
-public static String[] listOfAlbum(File[] listOfFiles)
-{
-	   String [] guesses = new String[listOfFiles.length];
-	   
-	   for(int i = 0; i < listOfFiles.length; i++)
-	   {
-	   Mp3File mp3file = initiateTagger(listOfFiles[i].getAbsolutePath());
-	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-	   try {
-		   //System.out.println(id3v2Tag.getAlbum());
-			guesses[i] = id3v2Tag.getAlbum();
-	   }catch(NullPointerException e) {continue;}
-	   }
-	   guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]); //remove duplicates
-	   return guesses;
-}
-
-public static void sortIntoFoldersAlbum(File[] files)
-{
-	String direc = SET_PATH;
-	String temp = "";
-	String[] albums = listOfAlbum(files);
 	
-	for (String album : albums)
-			if (album != null)
-				new File(direc+"/"+album).mkdirs();
-			
-	for (File song : files)
-	{
-		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
-		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-	   try {
-		   //System.out.println(id3v2Tag.getAlbum());
-			temp = id3v2Tag.getAlbum();
-			song.renameTo(new File(direc+"/"+temp+"/"+song.getName()));
-	   }catch(NullPointerException e) {}
-	   }	
 }
-
-
-
-public static String[] listOfArtists(File[] listOfFiles)
-{
-	   String [] guesses = new String[listOfFiles.length];
-	   
-	   for(int i = 0; i < listOfFiles.length; i++)
-	   {
-	   Mp3File mp3file = initiateTagger(listOfFiles[i].getAbsolutePath());
-	   ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-	   try {
-		   //System.out.println(id3v2Tag.getAlbum());
-			guesses[i] = id3v2Tag.getArtist();
-	   }catch(NullPointerException e) {continue;}
-	   }
-	   guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]); //remove duplicates
-	   return guesses;
-}
-
-public static void sortIntoFoldersArtist(File[] files)
-{
-	String direc = SET_PATH;
-	String temp = "";
-	String[] albums = listOfArtists(files);
-	
-	for (String album : albums)
-			if (album != null)
-				new File(direc+"/"+album).mkdirs();
-			
-	for (File song : files)
-	{
-		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
-		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-	   try {
-		   //System.out.println(id3v2Tag.getAlbum());
-			temp = id3v2Tag.getArtist();
-			song.renameTo(new File(direc+"/"+temp+"/"+song.getName()));
-	   }catch(NullPointerException e) {}
-	   }	
-}
-	
-
-public static void searchThis(String name)
-   {
-	   		 /**
-	   * This method is broken but looks up database returns XML tags crazy smhfsf
-	   * @param String name: artist name with spaces replaced because url
-	   * @return none
-	   */
-		String urlToRead = "http://www.musicbrainz.org/ws/2/recording/?query=artist:"+name;
-		
-		
-				URL url;
-				HttpURLConnection conn;
-				BufferedReader rd;
-				String line;
-				String result = "";
-				try {
-					url = new URL(urlToRead);
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("GET");
-					rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-					while ((line = rd.readLine()) != null) {
-						//if (line.contains("<title>"))
-						//{
-							result += line;
-							
-							//break;
-						//}
-					}
-					rd.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			System.out.println(result);
-   }
-   
-}
-
