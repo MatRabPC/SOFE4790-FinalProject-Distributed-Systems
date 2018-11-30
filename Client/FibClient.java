@@ -14,14 +14,14 @@ import java.util.Arrays;
 
 public class FibClient {
 	
-	public static String SET_PATH = "";
+	public static String SET_PATH = "C:\\";
 	public static Fib f = null;
 	
    public static void main(String[] args) {
 
       try {
         f = (Fib) Naming.lookup(Fib.SERVICENAME);
-		SET_PATH = f.dirChooseReturnPath();
+	//	SET_PATH = dirChooseReturnPath();
       } catch(Exception e) {
         System.err.println("Remote exception: "+e.getMessage());
         e.printStackTrace();
@@ -29,6 +29,7 @@ public class FibClient {
 	  
 	  
 		System.out.println(SET_PATH);
+		
 		
 		viewGUI();
 	  
@@ -89,7 +90,8 @@ public class FibClient {
           public void actionPerformed( ActionEvent aActionEvent ) {
 			 sortIntoFoldersAlbum(getFileList(SET_PATH));
 			 JOptionPane.showMessageDialog(null, "Sorted by album.","Message", JOptionPane.INFORMATION_MESSAGE);
-			 mainFrame.revalidate();
+			 mainFrame.dispose();
+			 viewGUI();
           }});
 		
 		
@@ -104,17 +106,67 @@ public class FibClient {
 		  
 		  
 		JButton buttonRenameFile = new JButton("Rename");
-		JButton buttonManual = new JButton("Manual Tag");
+		buttonRenameFile.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			 renameByTags();
+			 JOptionPane.showMessageDialog(null, "Renamed.","Message", JOptionPane.INFORMATION_MESSAGE);
+			 mainFrame.dispose();
+			 viewGUI();
+          }});
+		  
+		  
+		JButton buttonManual = new JButton("Upload to Server");
+		
+		
+		JButton buttonSetAllAlbum = new JButton("Set All Album");
+		buttonSetAllAlbum.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			setAllAlbum();
+			 
+          }});
+		  
+		  		JButton buttonSetAllArtist = new JButton("Set All Artist");
+		buttonSetAllArtist.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			setAllArtist();
+			 
+          }});
+		
+		
 		JButton buttonSetDir = new JButton("Set Directory");
+		buttonSetDir.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			SET_PATH = dirChooseReturnPath();
+			 mainFrame.dispose();
+			 viewGUI();
+			 
+          }});
+		  
+		  JButton buttonOpenDir = new JButton("Open Directory");
+		buttonOpenDir.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			  try{
+			Desktop.getDesktop().open(new File(SET_PATH));
+		  }catch (Exception e) {}
+			 
+          }});
 		
 		JPanel sidePanel = new JPanel(); 
-		sidePanel.setLayout(new GridLayout(5, 1));
+		sidePanel.setLayout(new GridLayout(8, 1));
         
 		sidePanel.add(buttonSortAlbum);
 		sidePanel.add(buttonSortArtist);
 		sidePanel.add(buttonRenameFile);
-		sidePanel.add(buttonManual);
+		sidePanel.add(buttonSetAllAlbum);
+		sidePanel.add(buttonSetAllArtist);
 		sidePanel.add(buttonSetDir);
+		sidePanel.add(buttonOpenDir);
+		sidePanel.add(buttonManual);
 		
 
         //... Add a titled border to the button panel.
@@ -126,10 +178,154 @@ public class FibClient {
 		mainFrame.setSize(1280,720);
         mainFrame.setLocationRelativeTo(null);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//mainFrame.pack();
+		mainFrame.pack();
         mainFrame.setVisible(true);
 	   
    }
+   
+   
+   public static void setAllAlbum()
+{
+	   JFrame dirFrame = new JFrame("");
+	dirFrame.setLayout(new GridLayout(1,2));
+	
+	JTextArea t2 = new JTextArea(1, 20);
+	
+	JButton b2 = new JButton("Set");
+	
+	b2.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+		//	 DEST_PATH = dirChooseReturnPath();
+		String name = t2.getText();
+		
+			File[] files = getFileList(SET_PATH);
+	String temp = "";
+		new File(SET_PATH+"/"+name).mkdirs();
+	for (File song : files)
+	{
+		temp = song.getName();
+		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
+		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			id3v2Tag.setAlbum(name);
+			mp3file.save(SET_PATH+"/"+name+"/"+temp);
+			System.out.println(name);
+			
+	   }catch(Exception e) {}
+	   }	
+		
+		JOptionPane.showMessageDialog(null, "Retagged Album.","Message", JOptionPane.INFORMATION_MESSAGE);
+			 dirFrame.dispose();
+			 
+          }});
+		 
+
+		 dirFrame.add(t2);
+		 dirFrame.add(b2);
+		 dirFrame.setLocationRelativeTo(null);
+        dirFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		dirFrame.pack();
+        dirFrame.setVisible(true);
+}
+
+
+   public static void setAllArtist()
+{
+	   JFrame dirFrame = new JFrame("");
+	dirFrame.setLayout(new GridLayout(1,2));
+	
+	JTextArea t2 = new JTextArea(1, 20);
+	
+	JButton b2 = new JButton("Set");
+	
+	b2.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+		//	 DEST_PATH = dirChooseReturnPath();
+		String name = t2.getText();
+		
+			File[] files = getFileList(SET_PATH);
+	String temp = "";
+		new File(SET_PATH+"/"+name).mkdirs();
+	for (File song : files)
+	{
+		temp = song.getName();
+		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
+		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			id3v2Tag.setArtist(name);
+			mp3file.save(SET_PATH+"/"+name+"/"+temp);
+			System.out.println(name);
+			
+	   }catch(Exception e) {}
+	   }	
+		
+		JOptionPane.showMessageDialog(null, "Retagged Album.","Message", JOptionPane.INFORMATION_MESSAGE);
+			 dirFrame.dispose();
+			 
+          }});
+		 
+
+		 dirFrame.add(t2);
+		 dirFrame.add(b2);
+		 dirFrame.setLocationRelativeTo(null);
+        dirFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		dirFrame.pack();
+        dirFrame.setVisible(true);
+}
+   
+public static void setManualTagGUI(String name)
+{
+	   JFrame dirFrame = new JFrame("");
+		dirFrame.setLayout(new GridLayout(2,3));
+		
+		JLabel l1 = new JLabel(name);
+		JLabel l2 = new JLabel("Destination Path:");
+		
+		JButton b1 = new JButton("Open...");
+		JButton b2 = new JButton("Open...");
+	//	JButton b3 = new JButton("Done");
+		
+		b1.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+			 SET_PATH = dirChooseReturnPath();
+			 dirFrame.dispose();
+			// setDirGUI();
+          }});
+		
+		
+		b2.addActionListener( new ActionListener() {
+          @Override
+          public void actionPerformed( ActionEvent aActionEvent ) {
+		//	 DEST_PATH = dirChooseReturnPath();
+			 dirFrame.dispose();
+			// setDirGUI();
+          }});
+		
+		
+		
+		JTextArea t1 = new JTextArea(SET_PATH);
+		JTextArea t2 = new JTextArea(SET_PATH);
+		
+		dirFrame.add(l1);
+		dirFrame.add(t1);
+		dirFrame.add(b1);
+		dirFrame.add(l2);
+		dirFrame.add(t2);
+		dirFrame.add(b2);
+	
+		dirFrame.setLocationRelativeTo(null);
+        dirFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		dirFrame.pack();
+        dirFrame.setVisible(true);
+		
+		
+}
+		
 
 public static String[] listOfAlbum(File[] listOfFiles)
 {
@@ -146,6 +342,28 @@ public static String[] listOfAlbum(File[] listOfFiles)
 	   }
 	   guesses = new HashSet<String>(Arrays.asList(guesses)).toArray(new String[0]); //remove duplicates
 	   return guesses;
+}
+
+public static void renameByTags()
+{
+	File[] files = getFileList(SET_PATH);
+	String temp = "";
+		
+	for (File song : files)
+	{
+		Mp3File mp3file = initiateTagger(song.getAbsolutePath());
+		ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	   try {
+		   //System.out.println(id3v2Tag.getAlbum());
+			temp = id3v2Tag.getTitle();
+			if (temp != null && !temp.equals("null"))
+			{
+				song.renameTo(new File(SET_PATH+"/"+temp+".mp3"));
+				System.out.println(SET_PATH+"/"+temp+".mp3");
+			}
+			
+	   }catch(NullPointerException e) {}
+	   }	
 }
 
 public static void sortIntoFoldersAlbum(File[] files)
@@ -233,7 +451,40 @@ public static Mp3File initiateTagger(String filename)	{
 	return null;
 }
 
-	
+	  public static String fileChooseReturnPath()
+   {
+	    JFileChooser fc = new JFileChooser();
+		int returnVal = fc.showOpenDialog(null);
+		String fpath = "";
+		
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                //This is where a real application would open the file.
+              //  System.out.println("Opening: " + file.getName() + ".");
+				fpath = file.getAbsolutePath();
+            } else {
+                System.out.println("Open command cancelled by user.");
+            }
+		return fpath;    
+   }
+   
+   public static String dirChooseReturnPath()
+   {
+	    JFileChooser fc = new JFileChooser();
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		int returnVal = fc.showOpenDialog(null);
+		String fpath = "";
+		
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                //This is where a real application would open the file.
+              //  System.out.println("Opening: " + file.getName() + ".");
+				fpath = file.getAbsolutePath();
+            } else {
+                System.out.println("Open command cancelled by user.");
+            }
+		return fpath;    
+   }
 	
 public static void readFileTags(String filename)	{
 	
