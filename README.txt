@@ -1,6 +1,6 @@
 Server:
 	to compile: javac *.java
-	to run: java -Djava.security.policy=policy.txt FibServer
+	to run: java -Djava.security.policy=policy.txt -cp mp3agic.jar;.\ TaggrServer
 	(dont forget to run rmi registry)
 
 	
@@ -15,7 +15,7 @@ Server:
 
 Client:
 	to compile: javac -cp mp3agic.jar; *.java
-	to run: java -cp mp3agic.jar;.\ FibClient
+	to run: java -cp mp3agic.jar;.\ TaggrClient
 	
 	Auto-Sort by Album: sorts all songs in folder into separate folders based on Album
 	Auto-Sort by Artist: sorts all songs in folder into separate folders based on Artist
@@ -33,4 +33,4 @@ Client:
 
 
 
-TODO: Clean UI, migrate computations to server-side, add functionality for empty buttons, add new/useful methods
+TODO: add test cases, re-add QQ's interface for lookup
